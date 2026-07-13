@@ -8,7 +8,7 @@ def collect():
 
     for disk in disks:
         smart_data = run_smartctl(
-            device=disk["name"],
+            device=disk["device"],
             sample_file="samples/sata-hdd.json",
         )
 

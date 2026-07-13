@@ -17,6 +17,7 @@ def discover_disks(file_path: str) -> list[dict[str, str]]:
         disks.append(
             {
                 "name": device["name"],
+                "device": f"/dev/{device['name']}",
                 "model": device["model"],
                 "serial": device["serial"],
             }
