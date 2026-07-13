@@ -2,10 +2,7 @@ import json
 from typing import Any
 
 
-def parse_smart_file(file_path: str) -> dict[str, Any]:
-    with open(file_path, "r", encoding="utf-8") as file:
-        data = json.load(file)
-
+def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
     return {
         "model": data["model_name"],
         "serial": data["serial_number"],
@@ -16,5 +13,7 @@ def parse_smart_file(file_path: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    result = parse_smart_file("samples/sata-hdd.json")
-    print(result)
+    with open("samples/sata-hdd.json", "r", encoding="utf-8") as file:
+        smart = json.load(file)
+
+    print(parse_smart_data(smart))
