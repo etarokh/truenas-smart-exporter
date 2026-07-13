@@ -21,7 +21,11 @@ def collect() -> list[dict[str, Any]]:
             {
                 "name": disk["name"],
                 "device": disk["device"],
-                **parsed_smart,
+                "model": parsed_smart["model"] or disk["model"] or "unknown",
+                "serial": parsed_smart["serial"] or disk["serial"] or "unknown",
+                "smart_passed": parsed_smart["smart_passed"],
+                "temperature_celsius": parsed_smart["temperature_celsius"],
+                "power_on_hours": parsed_smart["power_on_hours"],
             }
         )
 

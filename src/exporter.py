@@ -50,17 +50,20 @@ def update_metrics() -> None:
             "serial": disk["serial"],
         }
 
-        smart_status.labels(**labels).set(
-            1 if disk["smart_passed"] else 0
-        )
+        if disk["smart_passed"] is not None:
+            smart_status.labels(**labels).set(
+                1 if disk["smart_passed"] else 0
+            )
 
-        disk_temperature.labels(**labels).set(
-            disk["temperature_celsius"]
-        )
+        if disk["temperature_celsius"] is not None:
+            disk_temperature.labels(**labels).set(
+                disk["temperature_celsius"]
+            )
 
-        disk_power_on_hours.labels(**labels).set(
-            disk["power_on_hours"]
-        )
+        if disk["power_on_hours"] is not None:
+            disk_power_on_hours.labels(**labels).set(
+                disk["power_on_hours"]
+            )
 
 
 @app.get("/metrics")
