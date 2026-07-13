@@ -1,0 +1,103 @@
+{
+   "blockdevices": [
+      {
+         "name": "sda",
+         "model": "ST4000VN006-3CW104",
+         "serial": "ZW62XX87",
+         "type": "disk",
+         "children": [
+            {
+               "name": "sda1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "sdb",
+         "model": "WDC WD40EFRX-68N32N0",
+         "serial": "WD-WCC7K2RACN79",
+         "type": "disk",
+         "children": [
+            {
+               "name": "sdb1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "sdc",
+         "model": "WDC WD40EFZZ-68CPAN0",
+         "serial": "WD-WX42DC5NXZDF",
+         "type": "disk",
+         "children": [
+            {
+               "name": "sdc1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "sdd",
+         "model": "ST4000VN006-3CW104",
+         "serial": "ZW621BYV",
+         "type": "disk",
+         "children": [
+            {
+               "name": "sdd1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "sde",
+         "model": "Fanxiang S101 128GB",
+         "serial": "26020079606020304",
+         "type": "disk",
+         "children": [
+            {
+               "name": "sde1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            },{
+               "name": "sde2",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            },{
+               "name": "sde3",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "zd0",
+         "model": null,
+         "serial": null,
+         "type": "disk"
+      },{
+         "name": "zd16",
+         "model": null,
+         "serial": null,
+         "type": "disk"
+      },{
+         "name": "nvme0n1",
+         "model": "Lexar SSD THOR PRO 1TB",
+         "serial": "RBA450H003127P2238",
+         "type": "disk",
+         "children": [
+            {
+               "name": "nvme0n1p1",
+               "model": null,
+               "serial": null,
+               "type": "part"
+            }
+         ]
+      }
+   ]
+}
