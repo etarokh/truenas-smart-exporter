@@ -4,12 +4,11 @@ from smartctl import run_smartctl
 
 
 def collect():
-    disks = discover_disks("samples/lsblk.json")
+    disks = discover_disks()
 
     for disk in disks:
         smart_data = run_smartctl(
             device=disk["device"],
-            sample_file="samples/sata-hdd.json",
         )
 
         parsed_smart = parse_smart_data(smart_data)
