@@ -1,9 +1,13 @@
+from typing import Any
+
 from discovery import discover_disks
 from parser import parse_smart_data
 from smartctl import run_smartctl
 
 
-def collect():
+def collect() -> list[dict[str, Any]]:
+    collected_disks: list[dict[str, Any]] = []
+
     disks = discover_disks()
 
     for disk in disks:
@@ -13,12 +17,16 @@ def collect():
 
         parsed_smart = parse_smart_data(smart_data)
 
-        print("=" * 60)
-        print(f"Disk : {disk['name']}")
-        print(f"Model: {disk['model']}")
-        print(f"Serial: {disk['serial']}")
-        print(parsed_smart)
+        collected_disks.append(
+            {
+                "name": disk["name"],
+                "device": disk["device"],
+                **parsed_smart,
+            }
+        )
+
+    return collected_disks
 
 
 if __name__ == "__main__":
-    collect()
+    print(collect())
