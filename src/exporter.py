@@ -1,18 +1,76 @@
 from flask import Flask, Response
-from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Gauge,
+    generate_latest,
+)
+
+from collector import collect
+
 
 app = Flask(__name__)
 
-exporter_up = Gauge(
-    "exporter_up",
-    "Exporter status",
+
+smart_status = Gauge(
+    "truenas_smart_status",
+    "SMART health status: 1 = passed, 0 = failed",
+    ["disk", "device", "model", "serial"],
 )
 
-exporter_up.set(1)
+disk_temperature = Gauge(
+    "truenas_smart_temperature_celsius",
+    "Current disk temperature in Celsius",
+    ["disk", "device", "model", "serial"],
+)
+
+disk_power_on_hours = Gauge(
+    "truenas_smart_power_on_hours",
+    "Total disk power-on hours",
+    ["disk", "device", "model", "serial"],
+)
+
+exporter_up = Gauge(
+    "truenas_smart_exporter_up",
+    "Whether the SMART exporter collection succeeded",
+)
+
+
+def update_metrics() -> None:
+    smart_status.clear()
+    disk_temperature.clear()
+    disk_power_on_hours.clear()
+
+    disks = collect()
+
+    for disk in disks:
+        labels = {
+            "disk": disk["name"],
+            "device": disk["device"],
+            "model": disk["model"],
+            "serial": disk["serial"],
+        }
+
+        smart_status.labels(**labels).set(
+            1 if disk["smart_passed"] else 0
+        )
+
+        disk_temperature.labels(**labels).set(
+            disk["temperature_celsius"]
+        )
+
+        disk_power_on_hours.labels(**labels).set(
+            disk["power_on_hours"]
+        )
 
 
 @app.get("/metrics")
 def metrics() -> Response:
+    try:
+        update_metrics()
+        exporter_up.set(1)
+    except Exception:
+        exporter_up.set(0)
+
     return Response(
         generate_latest(),
         mimetype=CONTENT_TYPE_LATEST,
@@ -20,4 +78,7 @@ def metrics() -> Response:
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=9111)
+    app.run(
+        host="0.0.0.0",
+        port=9111,
+    )

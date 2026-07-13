@@ -1,2 +1,2 @@
-prometheus-client
-Flask
+Flask>=3.1.0
+prometheus-client>=0.22.0
