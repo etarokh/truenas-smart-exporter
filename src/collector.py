@@ -1,8 +1,12 @@
+import logging
 from typing import Any
 
 from discovery import discover_disks
 from parser import parse_smart_data
 from smartctl import run_smartctl
+
+
+logger = logging.getLogger(__name__)
 
 
 def collect() -> list[dict[str, Any]]:
@@ -11,11 +15,24 @@ def collect() -> list[dict[str, Any]]:
     disks = discover_disks()
 
     for disk in disks:
-        smart_data = run_smartctl(
-            device=disk["device"],
-        )
+        parsed_smart: dict[str, Any] = {
+            "model": None,
+            "serial": None,
+            "smart_passed": None,
+            "temperature_celsius": None,
+            "power_on_hours": None,
+        }
 
-        parsed_smart = parse_smart_data(smart_data)
+        try:
+            smart_data = run_smartctl(
+                device=disk["device"],
+            )
+            parsed_smart = parse_smart_data(smart_data)
+        except Exception:
+            logger.exception(
+                "SMART collection failed for device %s",
+                disk["device"],
+            )
 
         collected_disks.append(
             {
@@ -33,4 +50,5 @@ def collect() -> list[dict[str, Any]]:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     print(collect())

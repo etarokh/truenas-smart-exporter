@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, Response
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
@@ -9,6 +11,7 @@ from collector import collect
 
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
 
 
 smart_status = Gauge(
@@ -73,6 +76,7 @@ def metrics() -> Response:
         exporter_up.set(1)
     except Exception:
         exporter_up.set(0)
+        logger.exception("SMART exporter collection failed")
 
     return Response(
         generate_latest(),
