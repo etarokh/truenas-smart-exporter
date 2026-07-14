@@ -19,4 +19,4 @@ COPY src/ ./src/
 
 EXPOSE 9111
 
-CMD ["python", "src/exporter.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:9111", "--workers", "1", "--threads", "4", "--timeout", "120", "--chdir", "src", "exporter:app"]
