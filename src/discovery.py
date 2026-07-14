@@ -33,15 +33,18 @@ def discover_disks(
         if device.get("type") != "disk":
             continue
 
-        if not device.get("serial"):
+        name = device.get("name", "")
+
+        # Only physical disks
+        if not name.startswith(("sd", "nvme")):
             continue
 
         disks.append(
             {
-                "name": device["name"],
-                "device": f"/dev/{device['name']}",
-                "model": device["model"],
-                "serial": device["serial"],
+                "name": name,
+                "device": f"/dev/{name}",
+                "model": (device.get("model") or "").strip(),
+                "serial": (device.get("serial") or "").strip(),
             }
         )
 
