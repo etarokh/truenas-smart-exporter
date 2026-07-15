@@ -53,6 +53,15 @@ def get_nvme_unsafe_shutdowns(data: dict[str, Any]) -> int | float | None:
     return max(0, unsafe_shutdowns)
 
 
+def get_nvme_error_log_entries(data: dict[str, Any]) -> int | float | None:
+    error_log_entries = get_nvme_health_log(data).get("num_err_log_entries")
+
+    if not isinstance(error_log_entries, (int, float)):
+        return None
+
+    return max(0, error_log_entries)
+
+
 def get_nvme_critical_warning(data: dict[str, Any]) -> int | None:
     critical_warning = get_nvme_health_log(data).get("critical_warning")
 
@@ -107,6 +116,7 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
         "life_remaining_percent": life_remaining_percent,
         "media_errors": get_nvme_media_errors(data),
         "unsafe_shutdowns": get_nvme_unsafe_shutdowns(data),
+        "error_log_entries": get_nvme_error_log_entries(data),
         "critical_warning": get_nvme_critical_warning(data),
     }
 

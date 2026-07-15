@@ -24,6 +24,7 @@ def collect() -> list[dict[str, Any]]:
             "life_remaining_percent": None,
             "media_errors": None,
             "unsafe_shutdowns": None,
+            "error_log_entries": None,
             "critical_warning": None,
         }
 
@@ -52,6 +53,7 @@ def collect() -> list[dict[str, Any]]:
                 ],
                 "media_errors": parsed_smart["media_errors"],
                 "unsafe_shutdowns": parsed_smart["unsafe_shutdowns"],
+                "error_log_entries": parsed_smart["error_log_entries"],
                 "critical_warning": parsed_smart["critical_warning"],
             }
         )

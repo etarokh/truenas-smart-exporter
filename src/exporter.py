@@ -50,6 +50,12 @@ nvme_unsafe_shutdowns = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+nvme_error_log_entries = Gauge(
+    "truenas_nvme_error_log_entries_total",
+    "Total NVMe error information log entries",
+    ["disk", "device", "model", "serial"],
+)
+
 nvme_critical_warning = Gauge(
     "truenas_nvme_critical_warning",
     "NVMe critical warning bitmask; 0 means no warning",
@@ -69,6 +75,7 @@ def update_metrics() -> None:
     disk_life_remaining.clear()
     nvme_media_errors.clear()
     nvme_unsafe_shutdowns.clear()
+    nvme_error_log_entries.clear()
     nvme_critical_warning.clear()
 
     disks = collect()
@@ -109,6 +116,11 @@ def update_metrics() -> None:
         if disk["unsafe_shutdowns"] is not None:
             nvme_unsafe_shutdowns.labels(**labels).set(
                 disk["unsafe_shutdowns"]
+            )
+
+        if disk["error_log_entries"] is not None:
+            nvme_error_log_entries.labels(**labels).set(
+                disk["error_log_entries"]
             )
 
         if disk["critical_warning"] is not None:
