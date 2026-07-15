@@ -1,4 +1,7 @@
+import json
 import logging
+import os
+from pathlib import Path
 
 from flask import Flask, Response
 from prometheus_client import (
@@ -14,14 +17,37 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 
-DISK_DISPLAY_NAMES = {
-    "sda": "BAY1",
-    "sdb": "BAY2",
-    "sdc": "BAY3",
-    "sdd": "BAY4",
-    "sde": "SSD",
-    "nvme0n1": "NVMe",
-}
+CONFIG_DIR = Path(
+    os.environ.get("TRUENAS_SMART_CONFIG_DIR", "/config")
+)
+
+
+def load_device_bay_names() -> dict[str, str]:
+    bay_map_path = CONFIG_DIR / "bay-map.json"
+    device_paths_path = CONFIG_DIR / "device-paths.json"
+
+    try:
+        with bay_map_path.open("r", encoding="utf-8") as file:
+            path_to_bay = json.load(file)
+
+        with device_paths_path.open("r", encoding="utf-8") as file:
+            path_to_device = json.load(file)
+    except (OSError, json.JSONDecodeError) as error:
+        logger.warning(
+            "Unable to load physical bay mapping: %s",
+            error,
+        )
+        return {}
+
+    device_to_bay = {}
+
+    for physical_path, bay_name in path_to_bay.items():
+        device_name = path_to_device.get(physical_path)
+
+        if device_name:
+            device_to_bay[device_name] = bay_name
+
+    return device_to_bay
 
 
 smart_status = Gauge(
@@ -117,11 +143,12 @@ def update_metrics() -> None:
     ata_crc_errors.clear()
 
     disks = collect()
+    device_bay_names = load_device_bay_names()
 
     for disk in disks:
         labels = {
             "disk": disk["name"],
-            "bay": DISK_DISPLAY_NAMES.get(
+            "bay": device_bay_names.get(
                 disk["name"],
                 disk["name"].upper(),
             ),
