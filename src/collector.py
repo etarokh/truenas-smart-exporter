@@ -26,6 +26,7 @@ def collect() -> list[dict[str, Any]]:
             "unsafe_shutdowns": None,
             "error_log_entries": None,
             "reallocated_sectors": None,
+            "pending_sectors": None,
             "critical_warning": None,
         }
 
@@ -56,6 +57,7 @@ def collect() -> list[dict[str, Any]]:
                 "unsafe_shutdowns": parsed_smart["unsafe_shutdowns"],
                 "error_log_entries": parsed_smart["error_log_entries"],
                 "reallocated_sectors": parsed_smart["reallocated_sectors"],
+                "pending_sectors": parsed_smart["pending_sectors"],
                 "critical_warning": parsed_smart["critical_warning"],
             }
         )

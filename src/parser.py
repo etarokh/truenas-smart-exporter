@@ -147,6 +147,10 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
             data,
             "Reallocated_Sector_Ct",
         ),
+        "pending_sectors": get_ata_raw_attribute(
+            data,
+            "Current_Pending_Sector",
+        ),
         "critical_warning": get_nvme_critical_warning(data),
     }
 

@@ -68,6 +68,12 @@ ata_reallocated_sectors = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+ata_pending_sectors = Gauge(
+    "truenas_ata_pending_sectors_total",
+    "Total number of current pending sectors reported by ATA SMART",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -84,6 +90,7 @@ def update_metrics() -> None:
     nvme_error_log_entries.clear()
     nvme_critical_warning.clear()
     ata_reallocated_sectors.clear()
+    ata_pending_sectors.clear()
 
     disks = collect()
 
@@ -138,6 +145,11 @@ def update_metrics() -> None:
         if disk["reallocated_sectors"] is not None:
             ata_reallocated_sectors.labels(**labels).set(
                 disk["reallocated_sectors"]
+            )
+
+        if disk["pending_sectors"] is not None:
+            ata_pending_sectors.labels(**labels).set(
+                disk["pending_sectors"]
             )
 
 
