@@ -22,6 +22,7 @@ def collect() -> list[dict[str, Any]]:
             "temperature_celsius": None,
             "power_on_hours": None,
             "life_remaining_percent": None,
+            "media_errors": None,
         }
 
         try:
@@ -47,6 +48,7 @@ def collect() -> list[dict[str, Any]]:
                 "life_remaining_percent": parsed_smart[
                     "life_remaining_percent"
                 ],
+                "media_errors": parsed_smart["media_errors"],
             }
         )
 

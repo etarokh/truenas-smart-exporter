@@ -17,16 +17,31 @@ def clamp_percent(value: int | float) -> float:
     return max(0, min(100, float(value)))
 
 
+def get_nvme_health_log(data: dict[str, Any]) -> dict[str, Any]:
+    health_log = data.get("nvme_smart_health_information_log", {})
+
+    if isinstance(health_log, dict):
+        return health_log
+
+    return {}
+
+
 def get_nvme_life_remaining(data: dict[str, Any]) -> float | None:
-    percentage_used = data.get(
-        "nvme_smart_health_information_log",
-        {},
-    ).get("percentage_used")
+    percentage_used = get_nvme_health_log(data).get("percentage_used")
 
     if not isinstance(percentage_used, (int, float)):
         return None
 
     return clamp_percent(100 - percentage_used)
+
+
+def get_nvme_media_errors(data: dict[str, Any]) -> int | float | None:
+    media_errors = get_nvme_health_log(data).get("media_errors")
+
+    if not isinstance(media_errors, (int, float)):
+        return None
+
+    return max(0, media_errors)
 
 
 def get_sata_life_remaining(data: dict[str, Any]) -> float | None:
@@ -72,6 +87,7 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
         "temperature_celsius": data.get("temperature", {}).get("current"),
         "power_on_hours": data.get("power_on_time", {}).get("hours"),
         "life_remaining_percent": life_remaining_percent,
+        "media_errors": get_nvme_media_errors(data),
     }
 
 

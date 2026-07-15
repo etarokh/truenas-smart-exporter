@@ -38,6 +38,12 @@ disk_life_remaining = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+nvme_media_errors = Gauge(
+    "truenas_nvme_media_errors_total",
+    "Total NVMe media and data integrity errors",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -49,6 +55,7 @@ def update_metrics() -> None:
     disk_temperature.clear()
     disk_power_on_hours.clear()
     disk_life_remaining.clear()
+    nvme_media_errors.clear()
 
     disks = collect()
 
@@ -78,6 +85,11 @@ def update_metrics() -> None:
         if disk["life_remaining_percent"] is not None:
             disk_life_remaining.labels(**labels).set(
                 disk["life_remaining_percent"]
+            )
+
+        if disk["media_errors"] is not None:
+            nvme_media_errors.labels(**labels).set(
+                disk["media_errors"]
             )
 
 
