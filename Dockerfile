@@ -9,7 +9,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         smartmontools \
         util-linux \
-        zfsutils-linux \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
