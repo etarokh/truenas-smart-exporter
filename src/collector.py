@@ -21,6 +21,7 @@ def collect() -> list[dict[str, Any]]:
             "smart_passed": None,
             "temperature_celsius": None,
             "power_on_hours": None,
+            "life_remaining_percent": None,
         }
 
         try:
@@ -43,6 +44,9 @@ def collect() -> list[dict[str, Any]]:
                 "smart_passed": parsed_smart["smart_passed"],
                 "temperature_celsius": parsed_smart["temperature_celsius"],
                 "power_on_hours": parsed_smart["power_on_hours"],
+                "life_remaining_percent": parsed_smart[
+                    "life_remaining_percent"
+                ],
             }
         )
 

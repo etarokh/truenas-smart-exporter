@@ -32,6 +32,12 @@ disk_power_on_hours = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+disk_life_remaining = Gauge(
+    "truenas_disk_life_remaining_percent",
+    "Estimated remaining SSD or NVMe life in percent",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -42,6 +48,7 @@ def update_metrics() -> None:
     smart_status.clear()
     disk_temperature.clear()
     disk_power_on_hours.clear()
+    disk_life_remaining.clear()
 
     disks = collect()
 
@@ -66,6 +73,11 @@ def update_metrics() -> None:
         if disk["power_on_hours"] is not None:
             disk_power_on_hours.labels(**labels).set(
                 disk["power_on_hours"]
+            )
+
+        if disk["life_remaining_percent"] is not None:
+            disk_life_remaining.labels(**labels).set(
+                disk["life_remaining_percent"]
             )
 
 
