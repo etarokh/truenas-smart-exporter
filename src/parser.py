@@ -2,15 +2,68 @@ import json
 from typing import Any
 
 
+DIRECT_REMAINING_ATTRIBUTE_NAMES = {
+    "Percent_Lifetime_Remain",
+    "SSD_Life_Left",
+    "Media_Wearout_Indicator",
+}
+
+USED_ATTRIBUTE_NAMES = {
+    "Percent_Lifetime_Used",
+}
+
+
+def clamp_percent(value: int | float) -> float:
+    return max(0, min(100, float(value)))
+
+
+def get_nvme_life_remaining(data: dict[str, Any]) -> float | None:
+    percentage_used = data.get(
+        "nvme_smart_health_information_log",
+        {},
+    ).get("percentage_used")
+
+    if not isinstance(percentage_used, (int, float)):
+        return None
+
+    return clamp_percent(100 - percentage_used)
+
+
+def get_sata_life_remaining(data: dict[str, Any]) -> float | None:
+    model = data.get("model_name") or ""
+
+    attributes = data.get(
+        "ata_smart_attributes",
+        {},
+    ).get("table", [])
+
+    for attribute in attributes:
+        name = attribute.get("name")
+        value = attribute.get("value")
+
+        if not isinstance(value, (int, float)):
+            continue
+
+        if name in DIRECT_REMAINING_ATTRIBUTE_NAMES:
+            return clamp_percent(value)
+
+        if name in USED_ATTRIBUTE_NAMES:
+            return clamp_percent(100 - value)
+
+        if (
+            model.startswith("Fanxiang S101")
+            and name == "Wear_Leveling_Count"
+        ):
+            return clamp_percent(value)
+
+    return None
+
+
 def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
-    percentage_used = data.get("nvme_smart_health_information_log", {}).get(
-        "percentage_used"
-    )
+    life_remaining_percent = get_nvme_life_remaining(data)
 
-    life_remaining_percent = None
-
-    if isinstance(percentage_used, (int, float)):
-        life_remaining_percent = max(0, min(100, 100 - percentage_used))
+    if life_remaining_percent is None:
+        life_remaining_percent = get_sata_life_remaining(data)
 
     return {
         "model": data.get("model_name"),
