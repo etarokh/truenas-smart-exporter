@@ -71,6 +71,32 @@ def get_nvme_critical_warning(data: dict[str, Any]) -> int | None:
     return max(0, critical_warning)
 
 
+def get_ata_raw_attribute(
+    data: dict[str, Any],
+    attribute_name: str,
+) -> int | float | None:
+    attributes = data.get(
+        "ata_smart_attributes",
+        {},
+    ).get("table", [])
+
+    if not isinstance(attributes, list):
+        return None
+
+    for attribute in attributes:
+        if attribute.get("name") != attribute_name:
+            continue
+
+        raw_value = attribute.get("raw", {}).get("value")
+
+        if isinstance(raw_value, (int, float)):
+            return max(0, raw_value)
+
+        return None
+
+    return None
+
+
 def get_sata_life_remaining(data: dict[str, Any]) -> float | None:
     model = data.get("model_name") or ""
 
@@ -117,6 +143,10 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
         "media_errors": get_nvme_media_errors(data),
         "unsafe_shutdowns": get_nvme_unsafe_shutdowns(data),
         "error_log_entries": get_nvme_error_log_entries(data),
+        "reallocated_sectors": get_ata_raw_attribute(
+            data,
+            "Reallocated_Sector_Ct",
+        ),
         "critical_warning": get_nvme_critical_warning(data),
     }
 

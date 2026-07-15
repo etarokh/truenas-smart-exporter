@@ -62,6 +62,12 @@ nvme_critical_warning = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+ata_reallocated_sectors = Gauge(
+    "truenas_ata_reallocated_sectors_total",
+    "Total number of reallocated sectors reported by ATA SMART",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -77,6 +83,7 @@ def update_metrics() -> None:
     nvme_unsafe_shutdowns.clear()
     nvme_error_log_entries.clear()
     nvme_critical_warning.clear()
+    ata_reallocated_sectors.clear()
 
     disks = collect()
 
@@ -126,6 +133,11 @@ def update_metrics() -> None:
         if disk["critical_warning"] is not None:
             nvme_critical_warning.labels(**labels).set(
                 disk["critical_warning"]
+            )
+
+        if disk["reallocated_sectors"] is not None:
+            ata_reallocated_sectors.labels(**labels).set(
+                disk["reallocated_sectors"]
             )
 
 
