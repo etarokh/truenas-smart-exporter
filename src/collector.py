@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from discovery import discover_disks
+from health import calculate_health_score
 from parser import parse_smart_data
 from smartctl import run_smartctl
 
@@ -30,6 +31,7 @@ def collect() -> list[dict[str, Any]]:
             "offline_uncorrectable": None,
             "crc_errors": None,
             "critical_warning": None,
+            "health_score": None,
         }
 
         try:
@@ -63,6 +65,7 @@ def collect() -> list[dict[str, Any]]:
                 "offline_uncorrectable": parsed_smart["offline_uncorrectable"],
                 "crc_errors": parsed_smart["crc_errors"],
                 "critical_warning": parsed_smart["critical_warning"],
+                "health_score": calculate_health_score(parsed_smart),
             }
         )
 

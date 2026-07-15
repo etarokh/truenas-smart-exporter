@@ -74,6 +74,12 @@ disk_life_remaining = Gauge(
     ["disk", "bay", "device", "model", "serial"],
 )
 
+disk_health_score = Gauge(
+    "truenas_disk_health_score",
+    "Heuristic disk health score from 0 to 100",
+    ["disk", "bay", "device", "model", "serial"],
+)
+
 nvme_media_errors = Gauge(
     "truenas_nvme_media_errors_total",
     "Total NVMe media and data integrity errors",
@@ -133,6 +139,7 @@ def update_metrics() -> None:
     disk_temperature.clear()
     disk_power_on_hours.clear()
     disk_life_remaining.clear()
+    disk_health_score.clear()
     nvme_media_errors.clear()
     nvme_unsafe_shutdowns.clear()
     nvme_error_log_entries.clear()
@@ -175,6 +182,11 @@ def update_metrics() -> None:
         if disk["life_remaining_percent"] is not None:
             disk_life_remaining.labels(**labels).set(
                 disk["life_remaining_percent"]
+            )
+
+        if disk["health_score"] is not None:
+            disk_health_score.labels(**labels).set(
+                disk["health_score"]
             )
 
         if disk["media_errors"] is not None:
