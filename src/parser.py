@@ -151,6 +151,10 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
             data,
             "Current_Pending_Sector",
         ),
+        "offline_uncorrectable": get_ata_raw_attribute(
+            data,
+            "Offline_Uncorrectable",
+        ),
         "critical_warning": get_nvme_critical_warning(data),
     }
 

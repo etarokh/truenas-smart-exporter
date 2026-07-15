@@ -74,6 +74,12 @@ ata_pending_sectors = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+ata_offline_uncorrectable = Gauge(
+    "truenas_ata_offline_uncorrectable_total",
+    "Total number of offline uncorrectable sectors reported by ATA SMART",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -91,6 +97,7 @@ def update_metrics() -> None:
     nvme_critical_warning.clear()
     ata_reallocated_sectors.clear()
     ata_pending_sectors.clear()
+    ata_offline_uncorrectable.clear()
 
     disks = collect()
 
@@ -150,6 +157,11 @@ def update_metrics() -> None:
         if disk["pending_sectors"] is not None:
             ata_pending_sectors.labels(**labels).set(
                 disk["pending_sectors"]
+            )
+
+        if disk["offline_uncorrectable"] is not None:
+            ata_offline_uncorrectable.labels(**labels).set(
+                disk["offline_uncorrectable"]
             )
 
 
