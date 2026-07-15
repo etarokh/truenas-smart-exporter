@@ -14,76 +14,86 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 
+DISK_DISPLAY_NAMES = {
+    "sda": "BAY1",
+    "sdb": "BAY2",
+    "sdc": "BAY3",
+    "sdd": "BAY4",
+    "sde": "SSD",
+    "nvme0n1": "NVMe",
+}
+
+
 smart_status = Gauge(
     "truenas_smart_status",
     "SMART health status: 1 = passed, 0 = failed",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 disk_temperature = Gauge(
     "truenas_smart_temperature_celsius",
     "Current disk temperature in Celsius",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 disk_power_on_hours = Gauge(
     "truenas_smart_power_on_hours",
     "Total disk power-on hours",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 disk_life_remaining = Gauge(
     "truenas_disk_life_remaining_percent",
     "Estimated remaining SSD or NVMe life in percent",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 nvme_media_errors = Gauge(
     "truenas_nvme_media_errors_total",
     "Total NVMe media and data integrity errors",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 nvme_unsafe_shutdowns = Gauge(
     "truenas_nvme_unsafe_shutdowns_total",
     "Total NVMe unsafe shutdowns",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 nvme_error_log_entries = Gauge(
     "truenas_nvme_error_log_entries_total",
     "Total NVMe error information log entries",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 nvme_critical_warning = Gauge(
     "truenas_nvme_critical_warning",
     "NVMe critical warning bitmask; 0 means no warning",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 ata_reallocated_sectors = Gauge(
     "truenas_ata_reallocated_sectors_total",
     "Total number of reallocated sectors reported by ATA SMART",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 ata_pending_sectors = Gauge(
     "truenas_ata_pending_sectors_total",
     "Total number of current pending sectors reported by ATA SMART",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 ata_offline_uncorrectable = Gauge(
     "truenas_ata_offline_uncorrectable_total",
     "Total number of offline uncorrectable sectors reported by ATA SMART",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 ata_crc_errors = Gauge(
     "truenas_ata_crc_errors_total",
     "Total number of UDMA CRC errors reported by ATA SMART",
-    ["disk", "device", "model", "serial"],
+    ["disk", "bay", "device", "model", "serial"],
 )
 
 exporter_up = Gauge(
@@ -111,6 +121,10 @@ def update_metrics() -> None:
     for disk in disks:
         labels = {
             "disk": disk["name"],
+            "bay": DISK_DISPLAY_NAMES.get(
+                disk["name"],
+                disk["name"].upper(),
+            ),
             "device": disk["device"],
             "model": disk["model"],
             "serial": disk["serial"],
