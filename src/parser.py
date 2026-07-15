@@ -44,6 +44,15 @@ def get_nvme_media_errors(data: dict[str, Any]) -> int | float | None:
     return max(0, media_errors)
 
 
+def get_nvme_critical_warning(data: dict[str, Any]) -> int | None:
+    critical_warning = get_nvme_health_log(data).get("critical_warning")
+
+    if not isinstance(critical_warning, int):
+        return None
+
+    return max(0, critical_warning)
+
+
 def get_sata_life_remaining(data: dict[str, Any]) -> float | None:
     model = data.get("model_name") or ""
 
@@ -88,6 +97,7 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
         "power_on_hours": data.get("power_on_time", {}).get("hours"),
         "life_remaining_percent": life_remaining_percent,
         "media_errors": get_nvme_media_errors(data),
+        "critical_warning": get_nvme_critical_warning(data),
     }
 
 

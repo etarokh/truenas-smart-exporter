@@ -44,6 +44,12 @@ nvme_media_errors = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+nvme_critical_warning = Gauge(
+    "truenas_nvme_critical_warning",
+    "NVMe critical warning bitmask; 0 means no warning",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -56,6 +62,7 @@ def update_metrics() -> None:
     disk_power_on_hours.clear()
     disk_life_remaining.clear()
     nvme_media_errors.clear()
+    nvme_critical_warning.clear()
 
     disks = collect()
 
@@ -90,6 +97,11 @@ def update_metrics() -> None:
         if disk["media_errors"] is not None:
             nvme_media_errors.labels(**labels).set(
                 disk["media_errors"]
+            )
+
+        if disk["critical_warning"] is not None:
+            nvme_critical_warning.labels(**labels).set(
+                disk["critical_warning"]
             )
 
 
