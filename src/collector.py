@@ -28,6 +28,7 @@ def collect() -> list[dict[str, Any]]:
             "reallocated_sectors": None,
             "pending_sectors": None,
             "offline_uncorrectable": None,
+            "crc_errors": None,
             "critical_warning": None,
         }
 
@@ -60,6 +61,7 @@ def collect() -> list[dict[str, Any]]:
                 "reallocated_sectors": parsed_smart["reallocated_sectors"],
                 "pending_sectors": parsed_smart["pending_sectors"],
                 "offline_uncorrectable": parsed_smart["offline_uncorrectable"],
+                "crc_errors": parsed_smart["crc_errors"],
                 "critical_warning": parsed_smart["critical_warning"],
             }
         )

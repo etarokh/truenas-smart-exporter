@@ -80,6 +80,12 @@ ata_offline_uncorrectable = Gauge(
     ["disk", "device", "model", "serial"],
 )
 
+ata_crc_errors = Gauge(
+    "truenas_ata_crc_errors_total",
+    "Total number of UDMA CRC errors reported by ATA SMART",
+    ["disk", "device", "model", "serial"],
+)
+
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
     "Whether the SMART exporter collection succeeded",
@@ -98,6 +104,7 @@ def update_metrics() -> None:
     ata_reallocated_sectors.clear()
     ata_pending_sectors.clear()
     ata_offline_uncorrectable.clear()
+    ata_crc_errors.clear()
 
     disks = collect()
 
@@ -162,6 +169,11 @@ def update_metrics() -> None:
         if disk["offline_uncorrectable"] is not None:
             ata_offline_uncorrectable.labels(**labels).set(
                 disk["offline_uncorrectable"]
+            )
+
+        if disk["crc_errors"] is not None:
+            ata_crc_errors.labels(**labels).set(
+                disk["crc_errors"]
             )
 
 

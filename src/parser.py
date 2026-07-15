@@ -155,6 +155,10 @@ def parse_smart_data(data: dict[str, Any]) -> dict[str, Any]:
             data,
             "Offline_Uncorrectable",
         ),
+        "crc_errors": get_ata_raw_attribute(
+            data,
+            "UDMA_CRC_Error_Count",
+        ),
         "critical_warning": get_nvme_critical_warning(data),
     }
 
