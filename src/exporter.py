@@ -11,7 +11,8 @@ from prometheus_client import (
 )
 
 from collector import collect
-
+from collector import collect
+from sensors import get_system_temperature
 
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
@@ -133,6 +134,10 @@ exporter_up = Gauge(
     "Whether the SMART exporter collection succeeded",
 )
 
+system_temperature = Gauge(
+    "truenas_system_temperature_celsius",
+    "System temperature reported by the ACPI thermal sensor",
+)
 
 def update_metrics() -> None:
     smart_status.clear()
@@ -151,6 +156,12 @@ def update_metrics() -> None:
 
     disks = collect()
     device_bay_names = load_device_bay_names()
+    temperature = get_system_temperature()
+
+    if temperature is not None:
+        system_temperature.set(temperature)
+
+
 
     for disk in disks:
         labels = {
