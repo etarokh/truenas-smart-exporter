@@ -20,12 +20,4 @@ COPY src/ ./src/
 
 EXPOSE 9111
 
-CMD [
-    "gunicorn",
-    "--bind", "0.0.0.0:9111",
-    "--workers", "1",
-    "--threads", "4",
-    "--timeout", "120",
-    "--chdir", "src",
-    "exporter:app"
-]
+CMD ["gunicorn", "--bind", "0.0.0.0:9111", "--workers", "1", "--threads", "4", "--timeout", "120", "--chdir", "src", "exporter:app"]
