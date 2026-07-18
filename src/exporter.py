@@ -11,8 +11,9 @@ from prometheus_client import (
 )
 
 from collector import collect
-from collector import collect
+from pool import collect_pools
 from sensors import get_system_temperature
+
 
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
@@ -131,13 +132,68 @@ ata_crc_errors = Gauge(
 
 exporter_up = Gauge(
     "truenas_smart_exporter_up",
-    "Whether the SMART exporter collection succeeded",
+    "Whether the exporter collection succeeded",
 )
 
 system_temperature = Gauge(
     "truenas_system_temperature_celsius",
     "System temperature reported by the ACPI thermal sensor",
 )
+
+pool_scan_state = Gauge(
+    "truenas_pool_scan_state",
+    "Pool scan state: 0 none, 1 scanning, 2 finished, 3 canceled, -1 unknown",
+    ["pool"],
+)
+
+pool_scan_function = Gauge(
+    "truenas_pool_scan_function",
+    "Pool scan function: 0 none, 1 scrub, 2 resilver, -1 unknown",
+    ["pool"],
+)
+
+pool_scan_progress = Gauge(
+    "truenas_pool_scan_progress_percent",
+    "Pool scan progress percentage",
+    ["pool"],
+)
+
+pool_scan_errors = Gauge(
+    "truenas_pool_scan_errors",
+    "Number of errors reported by the pool scan",
+    ["pool"],
+)
+
+pool_scan_examined_bytes = Gauge(
+    "truenas_pool_scan_examined_bytes",
+    "Bytes examined during the pool scan",
+    ["pool"],
+)
+
+pool_scan_total_bytes = Gauge(
+    "truenas_pool_scan_total_bytes",
+    "Total bytes to examine during the pool scan",
+    ["pool"],
+)
+
+pool_scan_issued_bytes = Gauge(
+    "truenas_pool_scan_issued_bytes",
+    "Bytes issued during the pool scan",
+    ["pool"],
+)
+
+pool_scan_start_timestamp = Gauge(
+    "truenas_pool_scan_start_timestamp",
+    "Pool scan start time as a Unix timestamp",
+    ["pool"],
+)
+
+pool_scan_end_timestamp = Gauge(
+    "truenas_pool_scan_end_timestamp",
+    "Pool scan end time as a Unix timestamp",
+    ["pool"],
+)
+
 
 def update_metrics() -> None:
     smart_status.clear()
@@ -154,14 +210,22 @@ def update_metrics() -> None:
     ata_offline_uncorrectable.clear()
     ata_crc_errors.clear()
 
+    pool_scan_state.clear()
+    pool_scan_function.clear()
+    pool_scan_progress.clear()
+    pool_scan_errors.clear()
+    pool_scan_examined_bytes.clear()
+    pool_scan_total_bytes.clear()
+    pool_scan_issued_bytes.clear()
+    pool_scan_start_timestamp.clear()
+    pool_scan_end_timestamp.clear()
+
     disks = collect()
     device_bay_names = load_device_bay_names()
     temperature = get_system_temperature()
 
     if temperature is not None:
         system_temperature.set(temperature)
-
-
 
     for disk in disks:
         labels = {
@@ -240,6 +304,61 @@ def update_metrics() -> None:
                 disk["crc_errors"]
             )
 
+    state_map = {
+        "NONE": 0,
+        "SCANNING": 1,
+        "FINISHED": 2,
+        "CANCELED": 3,
+        "CANCELLED": 3,
+    }
+
+    function_map = {
+        "NONE": 0,
+        "SCRUB": 1,
+        "RESILVER": 2,
+    }
+
+    for pool in collect_pools():
+        pool_name = pool["name"]
+        scan_state = str(pool["scan_state"]).upper()
+        scan_function = str(pool["scan_function"]).upper()
+
+        pool_scan_state.labels(pool=pool_name).set(
+            state_map.get(scan_state, -1)
+        )
+
+        pool_scan_function.labels(pool=pool_name).set(
+            function_map.get(scan_function, -1)
+        )
+
+        pool_scan_progress.labels(pool=pool_name).set(
+            pool["progress_percent"]
+        )
+
+        pool_scan_errors.labels(pool=pool_name).set(
+            pool["scan_errors"]
+        )
+
+        pool_scan_examined_bytes.labels(pool=pool_name).set(
+            pool["examined_bytes"]
+        )
+
+        pool_scan_total_bytes.labels(pool=pool_name).set(
+            pool["total_bytes"]
+        )
+
+        pool_scan_issued_bytes.labels(pool=pool_name).set(
+            pool["issued_bytes"]
+        )
+
+        pool_scan_start_timestamp.labels(pool=pool_name).set(
+            pool["start_timestamp"]
+        )
+
+        pool_scan_end_timestamp.labels(pool=pool_name).set(
+            pool["end_timestamp"]
+        )
+
 
 @app.get("/metrics")
 def metrics() -> Response:
@@ -248,7 +367,7 @@ def metrics() -> Response:
         exporter_up.set(1)
     except Exception:
         exporter_up.set(0)
-        logger.exception("SMART exporter collection failed")
+        logger.exception("Exporter collection failed")
 
     return Response(
         generate_latest(),

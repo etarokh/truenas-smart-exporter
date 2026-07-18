@@ -5,11 +5,14 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-RUN apt-get update \
+RUN sed -i 's/Components: main/Components: main contrib/' \
+        /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
         smartmontools \
         util-linux \
         lm-sensors \
+        zfsutils-linux \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
