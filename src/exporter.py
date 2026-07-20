@@ -12,7 +12,7 @@ from prometheus_client import (
 
 from collector import collect
 from pool import collect_pools
-from sensors import get_system_temperature
+from sensors import get_memory_temperatures, get_system_temperature
 
 
 app = Flask(__name__)
@@ -140,6 +140,12 @@ system_temperature = Gauge(
     "System temperature reported by the ACPI thermal sensor",
 )
 
+memory_temperature = Gauge(
+    "truenas_memory_temperature_celsius",
+    "Current DDR5 memory module temperature in Celsius",
+    ["dimm", "sensor"],
+)
+
 pool_scan_state = Gauge(
     "truenas_pool_scan_state",
     "Pool scan state: 0 none, 1 scanning, 2 finished, 3 canceled, -1 unknown",
@@ -259,9 +265,18 @@ def update_metrics() -> None:
     disks = collect()
     device_bay_names = load_device_bay_names()
     temperature = get_system_temperature()
+    memory_temperatures = get_memory_temperatures()
 
     if temperature is not None:
         system_temperature.set(temperature)
+
+    memory_temperature.clear()
+
+    for index, memory_sensor in enumerate(memory_temperatures, start=1):
+        memory_temperature.labels(
+            dimm=str(index),
+            sensor=str(memory_sensor["sensor"]),
+        ).set(float(memory_sensor["temperature_celsius"]))
 
     for disk in disks:
         labels = {
