@@ -48,6 +48,47 @@ def parse_time(value: str | None) -> int:
         return 0
 
 
+
+def collect_pool_list() -> dict[str, dict[str, Any]]:
+    try:
+        result = subprocess.run(
+            ["zpool", "list", "-Hp"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return {}
+
+    pools: dict[str, dict[str, Any]] = {}
+
+    for line in result.stdout.splitlines():
+        columns = line.split()
+
+        if len(columns) < 10:
+            continue
+
+        name = columns[0]
+
+        if name == "boot-pool":
+            continue
+
+        try:
+            pools[name] = {
+                "size_bytes": int(columns[1]),
+                "allocated_bytes": int(columns[2]),
+                "free_bytes": int(columns[3]),
+                "fragmentation_percent": float(columns[6]),
+                "capacity_percent": float(columns[7]),
+                "dedup_ratio": float(columns[8]),
+                "health": columns[9],
+            }
+        except ValueError:
+            continue
+
+    return pools
+
+
 def collect_pools() -> list[dict[str, Any]]:
     try:
         result = subprocess.run(
@@ -71,7 +112,10 @@ def collect_pools() -> list[dict[str, Any]]:
 
     pools = []
 
+    pool_list = collect_pool_list()
+
     for name, pool in pools_data.items():
+        pool_info = pool_list.get(name, {})
         if name == "boot-pool":
             continue
 
