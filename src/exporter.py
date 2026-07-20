@@ -194,6 +194,42 @@ pool_scan_end_timestamp = Gauge(
     ["pool"],
 )
 
+pool_size_bytes = Gauge(
+    "truenas_pool_size_bytes",
+    "Total pool size in bytes",
+    ["pool"],
+)
+
+pool_allocated_bytes = Gauge(
+    "truenas_pool_allocated_bytes",
+    "Allocated bytes in the pool",
+    ["pool"],
+)
+
+pool_free_bytes = Gauge(
+    "truenas_pool_free_bytes",
+    "Free bytes in the pool",
+    ["pool"],
+)
+
+pool_capacity_percent = Gauge(
+    "truenas_pool_capacity_percent",
+    "Pool capacity percentage",
+    ["pool"],
+)
+
+pool_fragmentation_percent = Gauge(
+    "truenas_pool_fragmentation_percent",
+    "Pool fragmentation percentage",
+    ["pool"],
+)
+
+pool_health = Gauge(
+    "truenas_pool_health",
+    "Pool health: 1=ONLINE, 0=other",
+    ["pool"],
+)
+
 
 def update_metrics() -> None:
     smart_status.clear()
@@ -357,6 +393,30 @@ def update_metrics() -> None:
 
         pool_scan_end_timestamp.labels(pool=pool_name).set(
             pool["end_timestamp"]
+        )
+
+        pool_size_bytes.labels(pool=pool_name).set(
+            pool["size_bytes"]
+        )
+
+        pool_allocated_bytes.labels(pool=pool_name).set(
+            pool["allocated_bytes"]
+        )
+
+        pool_free_bytes.labels(pool=pool_name).set(
+            pool["free_bytes"]
+        )
+
+        pool_capacity_percent.labels(pool=pool_name).set(
+            pool["capacity_percent"]
+        )
+
+        pool_fragmentation_percent.labels(pool=pool_name).set(
+            pool["fragmentation_percent"]
+        )
+
+        pool_health.labels(pool=pool_name).set(
+            1 if pool["health"] == "ONLINE" else 0
         )
 
 
