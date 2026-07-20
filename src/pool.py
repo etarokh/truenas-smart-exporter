@@ -152,7 +152,13 @@ def collect_pools() -> list[dict[str, Any]]:
                 "issued_bytes": parse_size(
                     scan.get("issued")
                 ),
-                "progress_percent": progress,
+                "size_bytes": pool_info.get("size_bytes", 0),
+		"allocated_bytes": pool_info.get("allocated_bytes", 0),
+		"free_bytes": pool_info.get("free_bytes", 0),
+		"capacity_percent": pool_info.get("capacity_percent", 0.0),
+		"fragmentation_percent": pool_info.get("fragmentation_percent", 0.0),
+		"health": pool_info.get("health", "UNKNOWN"),
+		"progress_percent": progress,
             }
         )
 
